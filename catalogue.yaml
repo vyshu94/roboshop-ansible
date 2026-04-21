@@ -35,9 +35,9 @@
       dest: /app
       remote_src: yes
 
-    - name: install npm dependencies
-      community.general.npm:
-        path: /app
+  - name: install npm dependencies
+    community.general.npm:
+      path: /app
 
   - name: copy catalogue service file
     ansible.builtin.copy:
