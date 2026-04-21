@@ -4,6 +4,7 @@
   vars:
     sg_id: sg-035ed7cc952446c58
     ami_id: ami-0220d79f3f480ecf5
+    domaain_name: dawsproject.online
     environments: dev
     instances:
     - mongodb
