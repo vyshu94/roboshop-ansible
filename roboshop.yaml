@@ -1,3 +1,5 @@
+# ansible-playbook -i localhost, -e '{instances=["mongodb", "catalogue", "redis", "user", "cart", "shipping", "payment", "frontend", "rabbitmq", "mySQL"]}' roboshop.yaml
+
 - name: create ec2 and route53 records
   hosts: all
   connection: local
@@ -6,6 +8,7 @@
     ami_id: ami-0220d79f3f480ecf5
     domain_name: dawsproject.online
     environments: dev
+    action: create
     instances:
     - mongodb
     - catalogue
@@ -23,10 +26,12 @@
         Name: "{{ item }}-{{ environments}}"
     loop: "{{ instances }}"  
     register: ec2_output
+    when: action == "create"
 
   - name: print the ec2_output
     ansible.builtin.debug:
       msg: "{{ ec2_output }}"
+    when: action == "create"
 
   - name: create route53 record
     amazon.aws.route53:
@@ -49,4 +54,24 @@
       value: "{{ item.instances[0].public_ip_address }}"
       wait: true
     loop: "{{ ec2_output.results }}"
-    when: item.item == 'frontend'
+    when: #add 
+    - item.item == 'frontend'
+    - action == "create"
+### Delete #
+  - name: delete r53 record
+    amazon.aws.route53:
+      state: absent
+      zone: "{{ domain_name }}"
+      record: "{{ item }}-{{ environments }}.{{ domain_name}}"
+      type: A
+      ttl: 1
+    loop: "{{ instances}}"
+    when: action == "destroy"
+
+  - name: delete ec2 instance
+    amazon.aws.ec2_instance:
+      state: absent
+      wait: false
+      instance_ids: "{{ item }}-{{ environments }}"
+    loop: "{{ instances }}"
+    when: action == "destroy"
