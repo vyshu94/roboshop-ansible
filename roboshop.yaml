@@ -54,7 +54,7 @@
       value: "{{ item.instances[0].public_ip_address }}"
       wait: true
     loop: "{{ ec2_output.results }}"
-    when: #add 
+    when:
     - item.item == 'frontend'
     - action == "create"
 ### Delete #
@@ -72,6 +72,6 @@
     amazon.aws.ec2_instance:
       state: absent
       wait: false
-      instance_ids: "{{ item }}-{{ environments }}"
+      name: "{{ item }}-{{ environments }}"
     loop: "{{ instances }}"
     when: action == "destroy"
